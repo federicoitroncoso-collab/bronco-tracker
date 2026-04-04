@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bronco Tracker · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --text: #e8ecf0;
+    --muted: #6b7589;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --accent: #3b82f6;
+    --accent2: #1d4ed8;
+    --gold: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .header-nav {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--border);
+    color: var(--text);
+  }
+  .nav-btn.active { color: var(--accent); }
+  .header-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* LAYOUT */
+  .page { display: none; padding: 28px 32px; }
+  .page.active { display: block; }
+
+  /* FILTERS */
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  select, input[type=text] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:hover, input:hover { border-color: var(--accent); }
+  select:focus, input:focus { border-color: var(--accent); }
+
+  /* STATS ROW */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .stat-card.gold::before { background: var(--gold); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* RECORD */
+  .record-bar {
+    background: linear-gradient(135deg, #1a1200, #2a1e00);
+    border: 1px solid #3d2e00;
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .record-crown { font-size: 24px; }
+  .record-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+  .record-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .record-player {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .record-meta { font-size: 12px; color: var(--muted); }
+
+  /* INDEX BARS */
+  .index-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .index-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .index-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .index-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .index-bar-label {
+    width: 70px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .index-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .index-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+  .index-bar-pct {
+    width: 40px;
+    text-align: right;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+  .ranking-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .ranking-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ranking-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .ranking-avg {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    transition: background 0.12s;
+  }
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row:hover { background: var(--surface2); }
+  .rank-pos {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    width: 28px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .rank-pos.top1 { color: #fbbf24; }
+  .rank-pos.top2 { color: #9ca3af; }
+  .rank-pos.top3 { color: #cd7c2e; }
+  .rank-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .rank-puesto {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .rank-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .rank-diff {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    width: 48px;
+    text-align: right;
+  }
+  .diag-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* FULL TABLE */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .table-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--text); }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .td-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .td-vam {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .badge.bien { background: rgba(34,197,94,0.12); color: var(--green); }
+  .badge.aceptable { background: rgba(234,179,8,0.12); color: var(--yellow); }
+  .badge.bajo { background: rgba(239,68,68,0.1); color: var(--red); }
+  .tag-cat {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--muted);
+  }
+
+  /* PLAYER PAGE */
+  .search-big {
+    width: 100%;
+    max-width: 400px;
+    font-size: 15px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+  }
+  .player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .player-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .player-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .player-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .player-stats {
+    display: flex;
+    gap: 16px;
+  }
+  .player-stat { flex: 1; }
+  .player-stat-label {
+    font-size: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .player-stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-head {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .modal-close {
+    background: var(--border);
+    border: none;
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px 28px; }
+  .modal-kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .modal-kpi {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .modal-kpi-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .modal-kpi-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+  }
+  .modal-hist-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .hist-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-date { font-size: 12px; color: var(--muted); width: 90px; }
+  .hist-inst { flex: 1; font-size: 12px; color: var(--muted); }
+  .hist-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .hist-vam { font-size: 12px; color: var(--muted); width: 70px; text-align: right; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .page.active { animation: fadeIn 0.25s ease; }
+
+  /* ===== RANKING PAGE ===== */
+  .ranking-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .ranking-page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .ranking-page-subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .hindu-logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hindu-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    object-fit: cover;
+  }
+  .hindu-logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .rank-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 860px) { .rank-columns { grid-template-columns: 1fr; } }
+  .rank-col-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 0 14px 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rank-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+    transition: transform 0.15s, border-color 0.15s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .rank-card:hover { transform: translateX(4px); border-color: var(--accent); }
+  .rank-card.pos-1 {
+    background: linear-gradient(135deg, #1a1400, #0f0c00);
+    border-color: #7a5c00;
+  }
+  .rank-card.pos-2 {
+    background: linear-gradient(135deg, #141414, #0a0a0a);
+    border-color: #4a4a4a;
+  }
+  .rank-card.pos-3 {
+    background: linear-gradient(135deg, #150a00, #0e0700);
+    border-color: #6b3d00;
+  }
+  .rank-card-pos {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    width: 44px;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .rank-card-pos.p1 { color: #fbbf24; font-size: 32px; }
+  .rank-card-pos.p2 { color: #9ca3af; }
+  .rank-card-pos.p3 { color: #cd7c2e; }
+  .rank-card-pos.pn { color: var(--muted); font-size: 22px; }
+  .rank-card-info { flex: 1; min-width: 0; }
+  .rank-card-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.1;
+  }
+  .rank-card-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .rank-card-meta span {
+    background: var(--border);
+    padding: 1px 7px;
+    border-radius: 4px;
+  }
+  .rank-card-right { text-align: right; flex-shrink: 0; }
+  .rank-card-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .rank-card-vam {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .rank-card-diag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+  .rank-card-diff {
+    position: absolute;
+    right: 18px;
+    bottom: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .cat-ranking-block {
+    margin-bottom: 40px;
+  }
+  .cat-ranking-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .rank-filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+  <div style="text-align:center;color:var(--muted)">
+    <div style="font-family:'Barlow Condensed';font-size:32px;font-weight:900;letter-spacing:3px;color:var(--text);margin-bottom:12px">BRONCO<span style="color:var(--accent)">TRACKER</span></div>
+    <div style="font-size:13px;letter-spacing:1px">Cargando datos desde Google Sheets…</div>
+    <div style="margin-top:20px;width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:20px auto"></div>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<header>
+  <div class="logo">Bronco<span>Tracker</span></div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('tabla')">Tabla Completa</button>
+    <button class="nav-btn" onclick="showPage('jugadores')">Jugadores</button>
+    <button class="nav-btn" onclick="showPage('ranking')">🏆 Ranking</button>
+  </nav>
+  <div class="header-badge">© Federico Troncoso · 2026</div>
+</header>
+
+<!-- DASHBOARD PAGE -->
+<div class="page active" id="page-dashboard">
+
+  <div class="filter-bar">
+    <span class="filter-label">Categoría</span>
+    <select id="dash-cat" onchange="renderDashboard()">
+      <option value="">Todas</option>
+      <option value="PS">PS</option>
+      <option value="M19">M19</option>
+      <option value="M17">M17</option>
+      <option value="M16">M16</option>
+      <option value="M15">M15</option>
+    </select>
+    <span class="filter-label" style="margin-left:8px">Instancia</span>
+    <select id="dash-inst" onchange="renderDashboard()">
+      <option value="">Todas</option>
+    </select>
+    <span class="filter-label" style="margin-left:8px">Grupo</span>
+    <select id="dash-grupo" onchange="renderDashboard()">
+      <option value="">Todos</option>
+      <option value="Forward">Forwards</option>
+      <option value="Back">Backs</option>
+    </select>
+  </div>
+
+  <div id="record-bar"></div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="index-section" id="index-section"></div>
+  <div class="main-grid">
+    <div class="ranking-card" id="ranking-forwards"></div>
+    <div class="ranking-card" id="ranking-backs"></div>
+  </div>
+</div>
+
+<!-- TABLA PAGE -->
+<div class="page" id="page-tabla">
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Todos los registros</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="tbl-cat" onchange="renderTabla()">
+          <option value="">Todas las categorías</option>
+          <option value="PS">PS</option>
+          <option value="M19">M19</option>
+          <option value="M17">M17</option>
+          <option value="M16">M16</option>
+          <option value="M15">M15</option>
+        </select>
+        <select id="tbl-grupo" onchange="renderTabla()">
+          <option value="">Todos los grupos</option>
+          <option value="Forward">Forwards</option>
+          <option value="Back">Backs</option>
+        </select>
+        <select id="tbl-diag" onchange="renderTabla()">
+          <option value="">Todos los diagnósticos</option>
+          <option value="Bien">🟢 Bien</option>
+          <option value="Aceptable">🟡 Aceptable</option>
+          <option value="Bajo">🔴 Bajo</option>
+        </select>
+        <input type="text" id="tbl-search" placeholder="Buscar jugador..." oninput="renderTabla()" style="width:160px">
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTabla('pos')">#</th>
+            <th onclick="sortTabla('nombre')">Nombre</th>
+            <th onclick="sortTabla('puesto')">Puesto</th>
+            <th onclick="sortTabla('categoria')">Cat.</th>
+            <th onclick="sortTabla('grupo')">Grupo</th>
+            <th onclick="sortTabla('segundos')">Tiempo ↕</th>
+            <th onclick="sortTabla('vam')">VAM km/h</th>
+            <th onclick="sortTabla('diagnostico')">Diagnóstico</th>
+            <th onclick="sortTabla('fecha')">Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- JUGADORES PAGE -->
+<div class="page" id="page-jugadores">
+  <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+    <input type="text" class="search-big" id="jug-search" placeholder="🔍  Buscar jugador..." oninput="renderJugadores()" style="margin:0">
+    <select id="jug-cat" onchange="renderJugadores()">
+      <option value="">Todas las categorías</option>
+      <option value="PS">PS</option>
+      <option value="M19">M19</option>
+      <option value="M17">M17</option>
+      <option value="M16">M16</option>
+      <option value="M15">M15</option>
+    </select>
+  </div>
+  <div class="player-grid" id="player-grid"></div>
+</div>
+
+<!-- RANKING PAGE -->
+<div class="page" id="page-ranking">
+
+  <!-- Header con logo -->
+  <div class="ranking-page-header">
+    <div>
+      <div class="ranking-page-title">Hindú Club Rugby · Broncotest</div>
+      <div class="ranking-page-subtitle">RANKING DE RENDIMIENTO</div>
+    </div>
+    <div class="hindu-logo-wrap">
+      <img class="hindu-logo" src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADhAOEDASIAAhEBAxEB/8QAHAABAAMBAQEBAQAAAAAAAAAAAAYHCAUEAwIB/8QAWhAAAAUCAAQODAgLBgYDAAAAAAECAwQFBgcREhMUISIjMTIzQUJRYXKBkSQ0N0NSU2JxobGyszZjc4KSlMHRFRYmNVRWdIOiwvAXJVVkk/FEhKPS0+HD4vL/xAAcAQABBQEBAQAAAAAAAAAAAAAABAUGBwgDAgH/xABEEQABAwICBgQJCAoDAQAAAAABAAIDBAUGEQcSITFBUWFxocETIjI1coGRsdEjNEJic5KishQWFzZTVILC4fAkUvEz/9oADAMBAAIRAxEAPwDZYAAEIAABCAAAQgAAEIA/ClobLT0hzp1Yhxi03QIXUH8yhG5Vckd7azbfhPLJv0HpjiTrlba7YrDbfksoNXpPEOjIZH+SM14dIxu8qeG63xj8aIa8YKslXjSmt0nTV/PSn7B4XL4o3+Z/1jCkW6pP0VwNbAPpK4dENeMH7J5s98U23fFF/wAy3++Me2Ld9Kd3OpzW+etKvsIBt1SPooFbAfpK2sof0V3DuHO9r1iM55LyDb9JYx2Y9dmNHjcjG434TJk56tMukJnRSM8oZLu2RjtxUrAciBXYUrc3B023UObA5r2voAABCAAAQgAAEIAABCAAAQgAAEIAABCAA+Ml9tlvG4YEL6KMcufV2mdaa1x3gpQONWq5rOccdzEbxnCVzC+0Vbd2EFuKy5Gp2tt8JXCV5z3wspKGWpOTRs5pLUVkcAzcVYFeuNuN27OzfxDKyyulWx1YxAa5hIbi5z8HNNseVwus9MVNWrnkynt1HKgx6rV5mhqdGky3PBZQasjz8RecSiGy09NGZJ3AAbyTkAo9PdpZnasY38lL6xfc2T31wRyVcM13volFEwVVaTrlVmx4Lfim9dc8x7xdZiY0zBjakYuyG5M13wpLx+pOIhFrlpNwtaiWMkMrhwjGf4jk0+olLIMPXWr8Zw1R9bZ2bT2KmHKrJ8aPgqpufpP8Y0dCt2gwS7DodNZ8pEZOV14h0ktttbm2235hEZ9OtG05Q0Tndbw33NcnRmCZ3bXzgf0k94WX01Nz9J/jH3Zqsjxo0ypLbm6ER+cc6bQaLO7cpFNf58ZCvTiHmDTrSu/+1CWjoeHf2tQ/BEw8icH+kjvKoeLcc1rvoklFv2bG764JrUsG1qTi1uM5Ac8KM8fqVjL+ERGtYJ6i0edotSbll4uQjNq6yxkZ/REstulDC10IZI8xOP8A3GQ+8M2jrJCbKjDt1pPGaNYfVPccj7M1NaPhCjzvzi0258btXPpFpib0WtZ3XadOz/xDyyS50HsH6Bl2pQ6zQ3s1UYMmI5wctGpV5jLSPoHUod0SYL26iVy2emrIxNTOBadxBBB6iNiSQ3WaF+pKNo4Hetb0mvxpOtua26jbNr1Kk9A7rayWQoC2b6jTmW4tV1zI2ru1cT5j+zYFiUquOQmG3HXdFwuC+jgciy3vUIzVUMtMcnhSCnqo5xm0qegPJCmNSmc424PWEaUoAABCAAAQgAAEIAABCAA+Ep9uMznXAIX5nSm4rOdcEGuqvtxWdFTf3THhcq+TkC6q+3FZ0dI/cNfzn9gz/fF2SJ0xzXQ82u1uqnaztyba+vFOMhvXQvq9pM55zXRAFOzZ0xtptpx9xa8hLSEGpSvMQ9NCpNRuGpaBpzWcc26lL2rSeNZ7wvGy7Sp1sxNYxPzXEa9LWjVK8kvBT5PrHjFuN7bhGERZa85Gxg97jwHaeHMNlstNTd5NcnVZxPcOZ/3oULtLBbnM3JuZ0m/8myv21F6i6xZ1OgwqZE0LTorUWOjvTSCSn/cegfxxxtpo3HHc223tlr4Iy/iDGF3xJNrVchIz2MHkjqbz6Tm7pVlUFopLczKFu3iTv9q/oCDXFhPoVMxtU7OVWR8TqWf9Q9noIxAqzhJuaf2vJapzXgRkFldKl4/RiD7Y9FGIrs0SGMRMPGTZ7GgF3tAB5pDW4pt9KdUO1zybt7d3ar2Hyclxmt0ktt89ZDM06o1Gd25U5sv5Z5SvQZjx5DfimxYNLoF8XOordvIR95d3Jglxzt+Tg9ru7JajblRnNykx3OYsh9xlXNt+KHrgzpsHtKdJifIvKb9Rj7U6BQRnBXbeRj7w7uRHjk5+PB7Hd2qtPgKFpOEa6oO6TmpzfgyUEr0liPrMxObdwpUafm2qtGdprmLb7oz1lqi6SyeUQK9aJMRWtpkYwTNHGPafunJx9QKfKPFlvqSGl2ofrbO0Zj2kKeS40aUw5Gmxmn47m3adQS0q6DFb3bguju5yTbzpMO/obq9Srmq2U9OUXmFlRn48phuTGdaebc1SHW1kpK/MZD9iMWLFN3w3PrUchbt2tO1py5t7M9h5EJyrrXS3FmUzc+RG/wBRCzOpVRo8xyLNadYkN7ZpepV/tyiwbFviRBezTjut7RSV7VXIZCfXZbVKuWHmqi3rje4vo3RvzHxcmwKMuWg1W1aloabua9wfRtXU8nEfGX/6GnsI48t2LY/0eQCOoA2sJ2HpYeI6N46QM1XNzs1TZ3+EYdaPny6D8dxWkqDV22mdHUrXI+3fjcJrlLjR6ubsT+k1FqeznG3BlKw7ukUyY3rouuh1dtpn8J07tdztlhHeleGXkerm7Ci52x1K7WbuS6gr21AyO9WkA8dNmNSmM42PYGhOSAAAQgAAEIAABC/KzxCIXLVGiJxxztdjb+WreR9//sdqvzM0zmm90c1KRR+Fi5W2uwYzutt/xK3zC2gpDVSho3cUkrKgQRl3FRLCRdTk6Y5rohdBpVRuGsNwYe6L1alL2rSd9Z8g8khcidMzTbTjjji0oaSjbKUZ4iIhfVgWwzbNHzZ5tya9krlueV4CeQvvPfCvG+LIcI2wGMAzP2Mb73Hob2kgcyGS0W194qTreQNrj7h1le+16DTreprcGG15Tji9u4rwlf1pDqgIfhFvRu2WNCwibeqryNQjgtJ8NX2J3xlGiornim5+DjzkmkOZJ7STwA/wOAVoTTU1rptZ3isb/uQXtvK7aVbLHZGvTXEa3Gb2yvKPwS8r1ilrquqs3M92ZKyI3BjM6ltPRwj5T9A5EyTInTHJM111+Q+vLcdXtlKHyGsMG6ObbhtjZXASVHF5G70B9EdO88eQqy74hqLiS0eLHy+PPq3BAABYaYEAAAhAAAIQAACF17buGq289naVJzbffGF6pt3zp+0sRi6LHvenXKWbMyiVDhxnF7fykHwi9IoAfttbjTzbrbrjbja8tKkLNKkqLfI94xA8X6P7ZiWMueNSfg8Db1O/7DtHA8C+Wm/VNtcA06zOLT3clqUeKvUqFXaa5AqLecYc+klW8oj3jEOwa3z+HCbo9WdbbqjaMbbm1TKSXqXxp6U8k+GSrtablha5eBmzZKw5tcNmeW5zTy7RuORBCtWkq6e50+uza07CD7iFnO6qFMtWsaBka41t2H+C6n7y3y/+omeDW7HIMxtpzc9opK+EnfIxYF40CPctGcgyNbcLVsPeLc3lebj5BQWRNo9YcjSGsxIYXkOp8ovsGosCYvjxbbjFUZCojHjDmNweOviBuPIEKtbzbHWepDo//m7d0dB7uYWp7eqLVNmNk25/d0vVsK8DjQfN9XSLAZXnWsYz9g3rTdTh/geQ7m8vcleKcLYP+t4zFt2bVHHmDiSdbkMryHU+UWyPNdSmmlLDuTvSVAnjDgpUAAEaVIAABCD5vLzTWMfQcm4pBtQtb3ReoQnyjAhQ+8qvoWHInc5pj+c/s6xmq7qm5JmOC1MMlXzXYLbutsIyPvPpPGYpNliTU6k3Fja5JfeS01zjPF1Cb2SnZT05mk2DLM9H/iid2qDLL4Nm1WHgStzOPuXLJa1tjKah87hr6NjpPiFtjy0enx6PSI9NjaTbDaUJ8vjUfKZ6fSPSpXUMf40xHJiS7yVhJ1M8mDk0bvWd56SVaFmtzbdSNhG/eTzPH4epcK+rkjWzQnJWk5JXqYzfhq5eQtk//Yz1MkyJ0xyTNdcfkPrynHF8JQ7d/XC7c1yOSW+00a1ET8WXC857PVxCPjUGjjBjMOW0Pmb/AMiUAvPLkwdA483Z78hlWeIrubhUkMPybdg7z6/cgkVDsq4qxTW6nTorbkdzKyVLeSnYMyPSM+MjEdF9YHu57Tue/wC+UO+kfFFZhm1MrKRrS4vDfGBIyLXHgRyHFeMPW2G5VRhlJy1SdnQR8VWf9mt3/oLX1lH3iN1SDJplSkQZrWbkMLyHU5ZK3seyXnGnhnnCV8PKz8sn2UiLaNNIVzxRXy09YxgDGaw1QQc9YDbm4806YksFNbIGSQkkl2W0jkTwA5KOgAC6FDkAAAhfenxJM6ZHgxtckPrS00na6ozxFpiT/wBmt3/oLX1lH3jlWP8ADCjft7XtENHim9JmkC54Wq4IaJjCHtJOsCdoOWzJwUvw3Yaa5xPfMSCDlsI5dIKz5WLHuaj01ydNgtIjsbZWeQrZMi2CPlEaGg8Kfc+qnMR7xIz4JFo2xXWYotklXWNa1zXlviggZBrTxJ580gxFa4bbUtiiJILc9vWRy6F/W1uNPNutu5txC0rSpG2QotgyPjF+YObrauGjOaMdabmxO29hKVp3nOQj9BkYoIf1Kv8AqahXlJxkeI+ki6gvxpgulxTSNhlOo9pza/LMjmOGYI4Z78j1prPeJbXKXtGbTvHP/wAVuXrhOjxc5At3Ny3OFMXuaOYXCPl2POKpnS5E6Y5KmynH5DmrU6vbKHwAK8NYPteG4fB0TPGO952ud1nl0DIdC5XK7VNxfrTO2cANw/3mVJbLqrkGY2NBUep69CrDe5v5MeT8oRag+kiMvmkMvw3M08LvwWzvwnTZFHcd3dGteS4Wmg+siHu/0gfF4QDcldnqSyTVO4rQER3Os5wfcRexKlo6mN6eucJIlAg6laAAAQgilzSuzPkEKdV0aRekyEpWeIVxfEvNU2ou81pPRjM/WQ6wM15Gt5lcpn6jC5UFhIqOiqk5zx9sCNM0ddTk9zc4LOWn5RzGRegnBGbmfzsxwWtgQg6Fs9ySf/FyVr+anUYusldYW6SrkbVhaYMOTpMox/V5X4Q5MOH4P0u6tLtzc3ezd25KdiF4Y6wdMtByM2fZFRXodPyeLG4fVpfOE0FIYbKlom7ygFuUFlKP3itWfoyeoZ70W2Rt3xFE14zZH8of6csvxFufQp5iesNLbnlp2u8Uevf2ZqDAADZ6p5BfWB7ue07nv++UKFF9YHu57Tue/wC+UKd03/u7H9q38r1LsF+cXegfe1S4Z5wlfDys/LJ9lI0MM84Svh5Wflk+ykV9oJ88VP2f97U/44+Zx+l3FR0AAajVZIAABC7Nj/DCjft7XtENHjOFj/DCjft7XtENHjMWnfzlS+gfzKysD/NpfS7lGsKfc+qnMR7xIz4NB4U+59VOYj3iRnwTXQZ5hm+1d+RiZsbfPmeiPe5AABdChyAAAQv0J7gxqehak3zxAB27TfzVSbCaqjD4iCu1O/UkBWoLVf0Nck1rvb+TIa/eFjP+PK6hYKRUtJk69Qp3jGVx1fMMjL21C1Yys4yKwmZqPLeSn0T9dgK+wAA5LovjLPWFiocJT+attz4x5a/UX2C26l2m4KVwqL/JuP8AvPeKDha251LUjrzlA5Z/qiuzHBoHB8xoayKM1xw0OfSLKP1jPNQVrzg0vQ281R6e34uM0nqSQiunOctttJDwLyfuty/uXjBLNapmfyAHtP8AhewZqu6Xo66qrK8ZMdyeaSjIvQRDSyRlbOZ3XXO+atXTphk0C07XT1s53tDB94uP9qV46kIjgZzJPsy+KAADSSrtBfWB7ue07nv++UKFF9YHu57Tue/75Qp3Tf8Au7H9q38r1LsF+cXegfe1S4Z5wlfDys/LJ9lI0MOVNtq3Z0tyTNodOekL27rjKVKX5zFI6OcX02Fq6WpqI3PDmavi5f8AYHiRyU0xDaZLpAyONwBBz29RHes2ANG/ifav6v0r6sgPxPtX9X6V9WQLf/braf5aT8PxUR/Umr/iN7fgs5ANG/ifav6v0r6sgPxPtX9X6V9WQD9utp/lpPw/FH6k1f8AEb2/BUXY/wAMKN+3te0Q0eOREta3Yz6JMeh01hxC8tp1EZKVIUWwZGOuKk0j4xpsU1cM9PG5gY0g62XPPgSpZh20SWuJ7JHA6xz2dSjWFPufVTmI94kZ8Gg8Kfc+qnMR7xIz4Lk0GeYZvtXfkYohjb58z0R73IAALoUOQAACEHuo7mamNjwj00/txseJPJK+tO0LQdvu521ac74ie39E0qL14hclIczkJsxR1pq/Ilz4t5hf/UIvtF1W4eOmtcwVncW5VLlPKE5wNXUAACFK15Kl2m4KVwqJ/JuN8/3ihd00tYWKewkMZ22+Y86j04/tDha3ZVLUiuDc4HLN9Q3ZwaXobmdoNPc8ZGaV1oIZtqiezHBf+Dt/RNh0ZwuBDQ19HUH6hFdOkBdbKSbgHkfebn/avGCX6tTKzmAfYf8AKkCRlhTWb1pzgahXRpDUwzZeETQN1VWL4uY7k801ZZegyDHoFqWtqK2Di4MP3S4H8yWY6jJjgfyJHty+C5QAA0mq7QX1ge7ntO57/vlChRfWB7ue07nv++UKd03/ALux/at/K9S7BfnF3oH3tUuHKmXHb0V5yNMrlNYkI27TklKVo85GY6ozzhK+HlZ+WT7KRSGjrCFPimulpqiQsDG62bcuYHHrU0xDdpLXAySNoJJy29RPcrs/Gu1P1ipP11H3h+NdqfrFSfrqPvGcQFvfsJtX8zJ7G/BRP9d6r+G3t+K0d+NdqfrFSfrqPvD8a7U/WKk/XUfeM4gD9hNq/mZPY34I/Xeq/ht7fitJMXPbsl9Ediu059xa8hDTclClrUewRFjHWGcLH+GFG/b2vaIaPFS6RsHU2FaqGCnkc8PaSdbLnlwUqw9d5LpE98jQMjls6lGsKfc+qnMR7xIz4NB4U+59VOYj3iRnwXLoM8wzfau/IxRDG3z5noj3uQAAXQocgAAEIPTT+3Gx5h7KOnsxseH7l9aNoV52qn8iZHyzHvCMXVbn5ta5gp2htZqz4TXj57SOpKj+whc9FRm4LZCs7k7Opcp5QjKBq94AAQpWvm8WtYhWV6RM7TarF8BaXU9JGR+wQtE9gQu5o395ZrvcplTXztkvSWLpHanf4OVruRXKZmvGWrJdyNZqY4LWwHT9E2g5B34khSfmq1Rek1dQg2ESn6FqTnPHpwKVM4N1OQHNzqLOR+8TjUn0ZzrC7STbDdcLTagzdHk8f0+V+EuTBh+o/RLqzPc7xfbu7cldopLDdTtC3e1O73OZSv8AeN6k/Rmxdoh2F6ifhe0HXW+2IK9EI8pJFqk9Wq+aQzvovvbbRiKF8hyZJ8m7+rd7HBpPRmp9iajNXb3ho2t8Yerf2ZqiAABtFU6gvrA93Padz3/fKFCi+sD3c9p3Pf8AfKFO6b/3dj+1b+V6l2C/OLvQPvapcM84Svh5Wflk+ykaGGecJXw8rPyyfZSK+0E+eKn7P+9qf8cfM4/S7io6AANRqskAAAhdmx/hhRv29r2iGjxnCx/hhRv29r2iGjxmLTv5ypfQP5lZWB/m0vpdyjWFPufVTmI94kZ8Gg8Kfc+qnMR7xIz4JroM8wzfau/IxM2NvnzPRHvcgAAuhQ5AAAIQdm12M7UmxyBN8GtN0VUm+eE1U/UjJXaButIArgp8b4OwfIckK6cSEepQtyGnNsNkK6ttjRV4SHe9xEJiJ+aWr/jNQstBYhWE7/CSOdzKn0TdRgav0AAOS6IODdsZx2HnWt0b1SecWmQ7w+EtrOs5sCFnbDFSm3ezozWtvozqeneFNsuyYNSblRtbkMLS60ryiPGQ1BdVI0VTZtMc3RjKdY5pnqy6D0/nDOV0U9yNMcE6stQ2opzE8Z8CFEbtTmKbXbsV/UGpx6xR49Tj7k+hK8nwFcJJ8pHjLoHvFP4FLj0NMct6Y7rb687E8hzFpo6SLHziPjFvjH2N8NyYbu8lIfI8ph5tO72bj0gq0bJcW3CkbL9Lcesb/bvWe8Ilvfi9cjkZtrsN/XYivJ30dB6XNxcYjY0Xe1vR7moTsJzW5DerjOeLc+49gxnuoQ5EGY5BmN5iQwvIcT/W8NN6NcZsxFbRFO7/AJEQAcOLhuD/AF7AeTuQIVbYis5t9QXMHybto6Oj1cOj1r4C+sD3c9p3Pf8AfKFCiybEwgUq37WjU2bCqS3GFrylMoRk6palFsrI98cdLNmrrxZGQUMZe8SNdkOQa8d4XrCtZDSVrpJnao1SPXmPgVb4zzhK+HlZ+WT7KRYn9rdC/wAMqv0Gv/IKsuyot1i5JlTjNONtvry0pXiytgi08RnxCF6IMLXezXOeWugdG0syBOW06zTz5BPOLbpSVlMxkDw4h2fYVzAABoNQJAAAIXZsf4YUb9va9oho8Znt2c3TK9TpzrTjjcWS26pKMWVkkePSxi1v7W6F/hlV+g1/5BQGmDC92vNdTyUEDpA1hBIy359JCneErpSUcEjZ3hpJ49S7uFPufVTmI94kZ8Fn3jhGo1ctubS40GotrfQlCDdbbydJRHp4lme8KwEr0R2Wvs9nlgrojG4yEgHlqsGftBTXiutgrKtr4HawDcvXmUH7Shx3OOttOLzaMt1SEHqU48WUfEWmXWEdpyU83GjNOOOOLShpKNspR7CSF/YPbVbtmj5twmnJkvVy1cHkQXIWM/PjMP2Nsa0uFaVssjdeRx8VmeRI4njkAOg7chzyQ2azS3SUtacmjefcOv1rPwC4L1wYxpucnW8bUSRwoy9xXzfBP0eYVNUIciDMcgzIzjEhjUONr2yQswxjK14lh16N/jDymHY5vWOI6RmOpcblaKm3P1Zhs4Ebj/vIr8x2868LqwWw26ZTZFYca1uKzlpT4SthCekzIukVhaNOclTGxesWn/m63m/JlS//AI0es/oDvfqsRxag3lKLRTF8msdwUywZ05yLTc67q3HNUpXhqPTMxNh4qTH0LDbaHtEFUtQAACEAAAhRe7YbmtzozeNxjVZPhJ309JYyFKYVLebd7Ohdrv6tP3ectgaOkNZ1nNivripTbWcgyO0pS9SrxTn3H93KF9uqzSyh3BI66mFRFq8Vk95tyNM1vONuIXlpUjbJUR6RkL6wd3U3c1HLOm23UGMlElr1LLkP0HjIV7hAthyDMc1oRCjVOZQ6w3OhO5uQj6K076DLfIwtxthKDFtsDWkCZmZY7p4tP1XceR2jkWO0XKS0VOZ2sOxw7x0haYESwh2bHuaHnY+bYqrCNbc4Kk+Ark5d7rIdS0bjp1y0wpsI826jUPMr27auI+TiPfHZGTKapueFrnrszjnjORB7QRxB9hCtKWKmulNkcnMcP9I6vbmsvVCHIgzHIM2M4xIb2zS/60y5R8Bou7bXpVzRM1MazchvcZLe6N/eXIYpa7rOrNvHnZDWfhcCWztfnlwT8/WY1ZgvSTbsRsbDIRFUcWk7CfqE7+ryht3gZqr7xhyot5L2jWj58uvL3/8AijoAAshR1AAAIQAACEAAAhB+47Dkp5uLGacfcWvIaaQjKUpXIQ7Fr2tWrhe/u+L2PwpK9S2jp3z8khdNl2dSrZYzrZZ+atGS7JcRquakuCX9HjFfYx0iWzDcZjzEk/BgO70z9Edp4DiH604fqbi4Oy1Wcz3c/cuXg2shu3WSqdRJt2quI5yWEnwS4z4z6C5ZwA5txVqnUKmuzqi9m2kbRHCcVvJQW+Yydcblc8U3LwsuckzzkAB7GtHAD/J25lWnT09Pa6bVb4rG7z3leS9rjjWzR3ZrmuSHNRGZx7o59xbJigMqTU6k5KkO5+Q+vLdV4SjHtuauVG5qw5Om8xhhG1aTxF/Me+JXg5tdydMb1oanwJg+LCVuLp8jPJkXnlyaOgceZ6AFWV5uj7xUhsexjd3xPdyClGDejx6ZDcrE1rsdhGXk8JSt5BcpniIWlg+pchzOVOafZEtedc/7S5CLS6BH6TBbrFSjwYX5qgr1KvHubBr828XSrfFrQIzcVnNNjncKs1UpdwTzR04gj1eK9CR/QAIUrQAACEAAAhBzqzT2p8NxpxvHjHRACFUtxUXRzP4Mm9sN6iM6vvqfAPy+Lj52zRl4W1IgzHNaGtLgo7dTZzTgr24qM3O7BqutyNoxJXtXfJXxL5d/nbL3arqaZwY8+Kmm4W8TjWbvWbKNVKhQ6i3Op7mYkI+itPgrLfIXlZN50+5Wc22ehKghGuxlr/iSfCL1Cu70s6RBec1oQlxEmK9nW8624heWlSMaVJVxkZbA+4twTbcXQBzjqTAeK8Db1OHFvRvHDiC22271VokyG1h3g+8citQj+qFQ2jhRkRs1FuFon0fpbSNcRz07/nLT5DFo0iq06sRNFU6c1Kb8Jte05DLZI+QxlvEmCbvhyTKrjOpwe3a0+vgeg5HoVmW69UlxbnC7byO/2d4UXuLBvb1TxuxmnKbI8KNizfS3sdWIQSsYL7hjacLQ1Ra4OQvNudStL0mLvAO1k0pYitDRG2XwjBwk8b2HMOH3skkrcMW+rJdqapPFuzs3dizROoFdg9uUioo8rQysnrIsQ5inG++DVQKLj0xYFNp6lAAqKIE/Vfl2Fp96YZMCtJ+Tmy62594WVc4340dKHRazO7So9Sf8pEZeT14sQ0uSeLSH9H2p09PIyhoQD0yZ9gYPevkeBW5/KT59Tf8AJVG0nBlc07TkNR6c18a8SldBIx+kyE5t3BhQYGu1HO1WR8dqW/8ATLZ6TMTkBAr3pWxHdWmMSiJh4R+L+LMu9hAPFPtFha30pDtXWPN23s3di/jbbbTWbbazbbe1Qjap6B/R5586FTImiqjKaix0d9dWSUis7twqHrka2W/+beR7KT9Z9QYrBhC74km1aOMkZ7XnMNHW7n0DN3QUur7vSW5mczsjwA3n1fFTW8LqpVsxM7MdzkhzcYyN0Xy8heV6xRtyVyo3NUtEzXfIaaRtWk8RF9vCHiVo2pzHJMl1x+QteWp1azUpXSJxZNmSJzzetDT+EMCW3CUXhnHXnI2vI3dDRwHTvPHIbBW1zvFTd36jRqs4DvPPq3BeOy7ZkTpjetC3YcHNfk9St02lQko4PGyR8fhdXHi/NLjZr+57d3TaSagjg8aGz4/L3uDxlY1o25Go8NtttodrpdHVTtVp2Jwt9vFONZ29eu2KO1S4TbbbeIdsC2ADKnRAAAIQAACEAAAhAAAIQcus0mNPYzbjY6gAQqwrVKcis6FqMZyXC4LvfGv+8uT/AGFc3ZYTbrOjqdm347m1Uj1HxHyGNGyo7brWJwROrWy4085JpTuYc4WRtV8hlsH0hwo7jLSu8U7EjqaKOoG3eso1agyIr25DnRXZtMmaKhOuRJDffWVmlXWW8NIVqlQpWtVmDoRzx7KDU30p2S6MYhtawc51nRNOdalt+EyslerYEqp7zT1LfBygZHeCo5PapYTrM4KKUXClXoOtVFuPUm/C3NzrIsXoEwpuFK2ZXbmjYPPazietGM/QIFVLOmxe9DhSKNIa70Ivc9GmFrqS8Q+DceMZ1eza38KWU+IbrSeKXaw+tt7dh7VfcW7bZlbncFNPyVvJSrqPJMdJufCd3ObHc5jyRmhUOR4ofFUP4r+ARCfQXb3H5GreB0tDvdqp0ZjaoHlwg9RI7itPOTIbW6So7fPeIc6VdVsxe2K7TebolKldRHjGckw/iv4B9m4MjxQ+Q6C6Bp+VrHEdDQO9y+vxtUHyYQPWT3BXRUcKNsRu19GzXPiWTT6XMQiFawrVqTjapUGPAb8YvXnPOWPERdRiJR6LJd70O7S7Mmyu9CW2zRjha1kPMXhHDjIdb8Oxp9bSmyoxHdavYHavojLt2ntUbnSqjV5eiahJkynPCeWasjzcReYe6k2/IkvbkLOpOD1uCy3JqrrcRvwnlknK83GfmEnpLEdrWrdpmfc/S5KDS30N7J9OLzGJTPeKalYIoAABuAGQ9iRwWqad2vJx4lRa27HjQYejqq63Ej+EvhchFsmfIQmlNp82rs6Bp0Z2DSuF459PlmWwXIXzjPYHfotoOSZmjq065LkeEvgchFsEXIQm8KE1FaxNt6YitXcJqo+MdikVNRRU48UbVzbeoUalsNtttjulsAAQpWgAAEIAABCAAAQgAAEIAABCAAAQgAAELyS6fGlbo2IxULOjZ7RUJ12JI8Yys0q6yEyACFW06kV5rdGo1Sb+OZyVdaMXpxjhTKZTv+Nt6ax+zLS568gXIaEb5D4OQ47my2O0dRLH5LiuL4I3+UFRki3rUd3R2Sxz4a/5CMeRVp2z/jDf+i4n1oF5u0WE53psfBVu07xTYVNulSPpLgbfAfoqlE2rbLW6Vhv5jLivUgeiPQ7Va3N2TL+Rhr/nxC4ytuneJbH3aokJvvTY+uulSfpIFvgH0VU8OHCa/N1syX/KkrS36Cx+sdqHSrilbnoamt/5ZnVfTXjPqxCx24MZvYbH3JDe8EklRLJ5TiUoZDGzyQoRTLGjE9omabkuTwnHlmpXWYlcGlxou5tjoAOK6r8pIfoAAhAAAIQAACEAAAhAAAIQAACEAAAhAAAIQAACEAAAhAAAIQAACEAAAhAAAIQAACEAAAhAAAIQAACEAAAhAAAIX//Z" alt="Hindú Club">
+      <div class="hindu-logo-text">HINDÚ<br>CLUB</div>
+    </div>
+  </div>
+
+  <!-- Filtro de instancia -->
+  <div class="rank-filter-bar">
+    <span class="filter-label">Instancia</span>
+    <select id="rank-inst" onchange="renderRanking()">
+      <option value="">Todas</option>
+      <option value="Pre Temporada 2026">Pre Temporada 2026</option>
+    </select>
+  </div>
+
+  <!-- Un bloque por categoría -->
+  <div id="ranking-por-categoria"></div>
+
+</div>
+
+<!-- MODAL JUGADOR -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-head">
+      <div>
+        <div style="font-family:'Barlow Condensed';font-size:24px;font-weight:900" id="modal-name"></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px" id="modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-kpis" id="modal-kpis"></div>
+      <div class="modal-hist-title">Historial de tests</div>
+      <div id="modal-hist"></div>
+    </div>
+  </div>
+</div>
+
+<footer>Bronco Tracker © Federico Troncoso · 2026 &nbsp;·&nbsp; Fuente de referencias: Unión Argentina de Rugby (UAR)</footer>
+
+<script>
+// ===================== DATA =====================
+// Data loaded dynamically from Google Sheets — do not edit manually
+let DATOS = [];
+
+const _PLACEHOLDER = [
+  {nombre:"Joaquín Ortega",fecha:"2026-02-15",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"PS",segundos:330,diagnostico:"Bajo"},
+  {nombre:"Fermín Marquez",fecha:"2026-02-05",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"PS",segundos:290,diagnostico:"Bajo"},
+  {nombre:"Juan Bautista Prestiani",fecha:"2026-02-15",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"PS",segundos:240,diagnostico:"Bajo"},
+  {nombre:"Ignacio Herrera",fecha:"2026-02-15",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"PS",segundos:266,diagnostico:"Bajo"},
+  {nombre:"Bruno Navarro",fecha:"2026-02-15",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"PS",segundos:296,diagnostico:"Bajo"},
+  {nombre:"Emiliano Gómez",fecha:"2026-02-15",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"PS",segundos:350,diagnostico:"Bajo"},
+  {nombre:"Ramiro Acosta",fecha:"2026-02-15",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"PS",segundos:460,diagnostico:"Bajo"},
+  {nombre:"Federico Suárez",fecha:"2026-02-15",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"PS",segundos:276,diagnostico:"Bajo"},
+  {nombre:"Gonzalo Benítez",fecha:"2026-02-15",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"PS",segundos:337,diagnostico:"Bajo"},
+  {nombre:"Iván Peralta",fecha:"2026-02-15",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"PS",segundos:369,diagnostico:"Bajo"},
+  {nombre:"Kevin Molina",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"PS",segundos:328,diagnostico:"Bajo"},
+  {nombre:"Cristian Vega",fecha:"2026-02-15",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"PS",segundos:250,diagnostico:"Bajo"},
+  {nombre:"Marcos Ibáñez",fecha:"2026-02-15",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"PS",segundos:374,diagnostico:"Bajo"},
+  {nombre:"Adrián Campos",fecha:"2026-02-15",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"PS",segundos:253,diagnostico:"Bajo"},
+  {nombre:"Ezequiel Villalba",fecha:"2026-02-15",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"PS",segundos:302,diagnostico:"Bajo"},
+  {nombre:"Nahuel Farías",fecha:"2026-02-15",puesto:"Hooker",instancia:"Pre Temporada 2026",categoria:"PS",segundos:361,diagnostico:"Bajo"},
+  {nombre:"Lautaro Díaz",fecha:"2026-02-23",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"PS",segundos:292,diagnostico:"Bajo"},
+  {nombre:"Tomás Bonetto",fecha:"2026-02-21",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M15",segundos:292,diagnostico:"Bien"},
+  {nombre:"Faustino Calabrito",fecha:"2026-02-21",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M15",segundos:346,diagnostico:"Bajo"},
+  {nombre:"Manuel Santiago",fecha:"2026-02-21",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M15",segundos:337,diagnostico:"Bajo"},
+  {nombre:"Mirco Vedoya",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:375,diagnostico:"Bajo"},
+  {nombre:"Mateo Henn",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:371,diagnostico:"Bajo"},
+  {nombre:"Salvador Seri",fecha:"2026-02-21",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"M15",segundos:340,diagnostico:"Bajo"},
+  {nombre:"Ulises Bentancort",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:434,diagnostico:"Bajo"},
+  {nombre:"Juan Bautista Dhers",fecha:"2026-02-21",puesto:"Hooker",instancia:"Pre Temporada 2026",categoria:"M15",segundos:442,diagnostico:"Bajo"},
+  {nombre:"Juan Zunino",fecha:"2026-02-21",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M15",segundos:347,diagnostico:"Bajo"},
+  {nombre:"Benicio Chiabrera",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:366,diagnostico:"Bajo"},
+  {nombre:"Bautista Rey",fecha:"2026-02-21",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M15",segundos:331,diagnostico:"Bajo"},
+  {nombre:"Tiziano Bejarano",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:497,diagnostico:"Bajo"},
+  {nombre:"Mateo Baudino",fecha:"2026-02-21",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M15",segundos:329,diagnostico:"Bajo"},
+  {nombre:"Ramiro Monteros",fecha:"2026-02-21",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M15",segundos:290,diagnostico:"Bien"},
+  {nombre:"Felipe Poderti",fecha:"2026-02-21",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M15",segundos:383,diagnostico:"Bajo"},
+  {nombre:"Federico Robles",fecha:"2026-02-21",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M15",segundos:360,diagnostico:"Bajo"},
+  {nombre:"Tomás Ayala",fecha:"2026-02-21",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M15",segundos:370,diagnostico:"Bajo"},
+  {nombre:"Felipe Seva",fecha:"2026-02-21",puesto:"Octavo",instancia:"Pre Temporada 2026",categoria:"M15",segundos:407,diagnostico:"Bajo"},
+  {nombre:"Giorgio Catalano",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:310,diagnostico:"Aceptable"},
+  {nombre:"Lucio Lazareff",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:380,diagnostico:"Bajo"},
+  {nombre:"Francisco Reto",fecha:"2026-02-21",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M15",segundos:321,diagnostico:"Aceptable"},
+  {nombre:"Belisario Pinto",fecha:"2026-02-21",puesto:"Hooker",instancia:"Pre Temporada 2026",categoria:"M15",segundos:379,diagnostico:"Bajo"},
+  {nombre:"Bautista Guillot",fecha:"2026-02-21",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"M15",segundos:375,diagnostico:"Bajo"},
+  {nombre:"Santino Galluzzo",fecha:"2026-02-21",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M15",segundos:384,diagnostico:"Bajo"},
+  {nombre:"Amadeo Senillosa",fecha:"2026-02-21",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M15",segundos:314,diagnostico:"Aceptable"},
+  {nombre:"Isidro López Muiño",fecha:"2026-02-21",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M15",segundos:321,diagnostico:"Aceptable"},
+  {nombre:"Tobías Solano",fecha:"2026-02-21",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M15",segundos:339,diagnostico:"Aceptable"},
+  {nombre:"Felipe Barragán",fecha:"2026-02-21",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M15",segundos:321,diagnostico:"Aceptable"},
+  {nombre:"Francisco Castelli",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:324,diagnostico:"Bajo"},
+  {nombre:"Teo Dewaele",fecha:"2026-02-21",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M15",segundos:387,diagnostico:"Bajo"},
+  {nombre:"Felix Cañete",fecha:"2026-02-21",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"M15",segundos:349,diagnostico:"Bajo"},
+  {nombre:"Camilo Espinoza",fecha:"2026-02-21",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M15",segundos:379,diagnostico:"Bajo"},
+  {nombre:"Facundo Lopez Espinard",fecha:"2026-02-21",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"M15",segundos:410,diagnostico:"Bajo"},
+  {nombre:"Ítalo Tejeda",fecha:"2026-02-21",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"M15",segundos:450,diagnostico:"Bajo"},
+  {nombre:"Tomás Dhers",fecha:"2026-02-21",puesto:"Octavo",instancia:"Pre Temporada 2026",categoria:"M15",segundos:333,diagnostico:"Aceptable"},
+  {nombre:"Tomás Hoorn",fecha:"2026-02-21",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M15",segundos:362,diagnostico:"Bajo"},
+  {nombre:"Toto Erize",fecha:"2026-02-21",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M15",segundos:314,diagnostico:"Aceptable"},
+  {nombre:"Benjamín Quesada",fecha:"2026-02-21",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M15",segundos:316,diagnostico:"Aceptable"},
+  // M17 - from BUSCAR POR FECHA (07/03/2026)
+  {nombre:"Fede Kantz",fecha:"2026-03-07",puesto:"Fullback",instancia:"Pre Temporada 2026",categoria:"M17",segundos:291,diagnostico:"Aceptable"},
+  {nombre:"Blas Decarabassa",fecha:"2026-03-07",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M17",segundos:292,diagnostico:"Aceptable"},
+  {nombre:"Mati Cersosimo",fecha:"2026-03-07",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:302,diagnostico:"Aceptable"},
+  {nombre:"Lennox Bettiga",fecha:"2026-03-07",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M17",segundos:311,diagnostico:"Aceptable"},
+  {nombre:"Torcua Grimaldi",fecha:"2026-03-07",puesto:"",instancia:"Pre Temporada 2026",categoria:"M17",segundos:297,diagnostico:"Aceptable"},
+  {nombre:"Juan Seyahian",fecha:"2026-03-07",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M17",segundos:326,diagnostico:"Bajo"},
+  {nombre:"Benjamín Doiny",fecha:"2026-03-07",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M17",segundos:341,diagnostico:"Bajo"},
+  {nombre:"Rodrigo Salaberry",fecha:"2026-03-07",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"M17",segundos:385,diagnostico:"Bajo"},
+  {nombre:"Benja Chiabrera",fecha:"2026-03-07",puesto:"Hooker",instancia:"Pre Temporada 2026",categoria:"M17",segundos:377,diagnostico:"Bajo"},
+  {nombre:"Santino Mariñas",fecha:"2026-03-07",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M17",segundos:338,diagnostico:"Bajo"},
+  {nombre:"Lolo Campos",fecha:"2026-03-07",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M17",segundos:304,diagnostico:"Aceptable"},
+  {nombre:"Emmanuel Azalot",fecha:"2026-03-07",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M17",segundos:330,diagnostico:"Bajo"},
+  {nombre:"Beni Maiale",fecha:"2026-03-07",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:329,diagnostico:"Bajo"},
+  {nombre:"Agus Luna",fecha:"2026-03-07",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:298,diagnostico:"Aceptable"},
+  {nombre:"Lucas Grassini",fecha:"2026-03-07",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:319,diagnostico:"Aceptable"},
+  {nombre:"Bauti Gerk",fecha:"2026-03-07",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:308,diagnostico:"Aceptable"},
+  {nombre:"Maxi Garcia",fecha:"2026-03-07",puesto:"Octavo",instancia:"Pre Temporada 2026",categoria:"M17",segundos:308,diagnostico:"Aceptable"},
+  {nombre:"Timoteo Ruzo",fecha:"2026-03-07",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M17",segundos:299,diagnostico:"Aceptable"},
+  {nombre:"Juan Vázquez",fecha:"2026-03-07",puesto:"Pilar",instancia:"Pre Temporada 2026",categoria:"M17",segundos:351,diagnostico:"Bajo"},
+  {nombre:"Franco Ferrario",fecha:"2026-03-07",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M17",segundos:325,diagnostico:"Bajo"},
+  {nombre:"Santino Sassano",fecha:"2026-03-07",puesto:"Octavo",instancia:"Pre Temporada 2026",categoria:"M17",segundos:325,diagnostico:"Bajo"},
+  {nombre:"Maxi Miqueleiz",fecha:"2026-03-07",puesto:"Segunda línea",instancia:"Pre Temporada 2026",categoria:"M17",segundos:338,diagnostico:"Bajo"},
+  {nombre:"Mateo Caiazzo",fecha:"2026-03-07",puesto:"Hooker",instancia:"Pre Temporada 2026",categoria:"M17",segundos:352,diagnostico:"Bajo"},
+  // M17 INTRA TEST
+  {nombre:"Indio Masoti",fecha:"2026-02-15",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M17",segundos:283,diagnostico:"Bien"},
+  {nombre:"Joaquín Calabrito",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:289,diagnostico:"Bien"},
+  {nombre:"Santi Prado",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:303,diagnostico:"Aceptable"},
+  {nombre:"Jero Tobias",fecha:"2026-02-15",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M17",segundos:308,diagnostico:"Aceptable"},
+  {nombre:"Joaquín Casteli",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:309,diagnostico:"Aceptable"},
+  {nombre:"Mateo Millón",fecha:"2026-02-15",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M17",segundos:310,diagnostico:"Aceptable"},
+  {nombre:"Salva Sainz",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:317,diagnostico:"Aceptable"},
+  {nombre:"Galo Bertol",fecha:"2026-02-15",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M17",segundos:317,diagnostico:"Aceptable"},
+  {nombre:"Franco Marotta",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:319,diagnostico:"Aceptable"},
+  {nombre:"Bautista Contartese",fecha:"2026-02-15",puesto:"Apertura",instancia:"Pre Temporada 2026",categoria:"M17",segundos:322,diagnostico:"Bajo"},
+  {nombre:"Vicente Yohma",fecha:"2026-02-15",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M17",segundos:325,diagnostico:"Bajo"},
+  {nombre:"Santiago Abad",fecha:"2026-02-15",puesto:"Medio scrum",instancia:"Pre Temporada 2026",categoria:"M17",segundos:325,diagnostico:"Bajo"},
+  {nombre:"Cris Papucchi",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:327,diagnostico:"Bajo"},
+  {nombre:"Benja Diez",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:342,diagnostico:"Bajo"},
+  {nombre:"Tommy Moriningo",fecha:"2026-02-15",puesto:"Wing",instancia:"Pre Temporada 2026",categoria:"M17",segundos:351,diagnostico:"Bajo"},
+  {nombre:"Santiago Sinner",fecha:"2026-02-15",puesto:"Centro",instancia:"Pre Temporada 2026",categoria:"M17",segundos:288,diagnostico:"Bien"},
+  {nombre:"Benicio Gonet",fecha:"2026-02-15",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M17",segundos:291,diagnostico:"Aceptable"},
+  {nombre:"Bruno Melganejo",fecha:"2026-02-15",puesto:"Ala",instancia:"Pre Temporada 2026",categoria:"M17",segundos:293,diagnostico:"Aceptable"},
+];
+// (static placeholder not used — data comes from Google Sheets)
+
+// Puesto → Grupo
+const GRUPO_MAP = {
+  "Pilar":"Forward","Hooker":"Forward","Segunda línea":"Forward","Ala":"Forward","Octavo":"Forward",
+  "Medio scrum":"Back","Apertura":"Back","Centro":"Back","Wing":"Back","Fullback":"Back"
+};
+
+// ===================== HELPERS =====================
+function fmtTime(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function diagColor(d) {
+  if(d==='Bien') return 'var(--green)';
+  if(d==='Aceptable') return 'var(--yellow)';
+  return 'var(--red)';
+}
+function diagClass(d) {
+  if(d==='Bien') return 'bien';
+  if(d==='Aceptable') return 'aceptable';
+  return 'bajo';
+}
+function diagEmoji(d) {
+  if(d==='Bien') return '🟢';
+  if(d==='Aceptable') return '🟡';
+  return '🔴';
+}
+
+// ===================== NAVIGATION =====================
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='dashboard') renderDashboard();
+  if(id==='tabla') renderTabla();
+  if(id==='jugadores') renderJugadores();
+  if(id==='ranking') renderRanking();
+}
+
+// ===================== POPULATE SELECTS =====================
+function initSelects() {
+  const instancias = [...new Set(DATOS.map(d=>d.instancia))];
+  const sel = document.getElementById('dash-inst');
+  instancias.forEach(i => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = i;
+    sel.appendChild(o);
+  });
+}
+
+// ===================== DASHBOARD =====================
+function getFiltered() {
+  const cat = document.getElementById('dash-cat').value;
+  const inst = document.getElementById('dash-inst').value;
+  const grupo = document.getElementById('dash-grupo').value;
+  return DATOS.filter(d =>
+    (!cat || d.categoria===cat) &&
+    (!inst || d.instancia===inst) &&
+    (!grupo || d.grupo===grupo)
+  );
+}
+
+function renderDashboard() {
+  const data = getFiltered();
+  if(!data.length) return;
+
+  // RECORD
+  const recordGlobal = [...DATOS].sort((a,b)=>a.segundos-b.segundos)[0];
+  document.getElementById('record-bar').innerHTML = `
+    <div class="record-bar">
+      <div class="record-crown">♕</div>
+      <div>
+        <div class="record-label">Récord Histórico General</div>
+        <div class="record-time">${fmtTime(recordGlobal.segundos)}</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border)"></div>
+      <div>
+        <div class="record-player">${recordGlobal.nombre}</div>
+        <div class="record-meta">${recordGlobal.puesto} · ${recordGlobal.categoria} · ${recordGlobal.fecha}</div>
+      </div>
+    </div>`;
+
+  // STATS
+  const total = data.length;
+  const bien = data.filter(d=>d.diagnostico==='Bien').length;
+  const acep = data.filter(d=>d.diagnostico==='Aceptable').length;
+  const bajo = data.filter(d=>d.diagnostico==='Bajo').length;
+  const avgSeg = Math.round(data.reduce((a,b)=>a+b.segundos,0)/total);
+  const best = [...data].sort((a,b)=>a.segundos-b.segundos)[0];
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Testeados</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">jugadores</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">🟢 Bien</div>
+      <div class="stat-value" style="color:var(--green)">${bien}</div>
+      <div class="stat-sub">${Math.round(bien/total*100)}% del grupo</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-label">🟡 Aceptable</div>
+      <div class="stat-value" style="color:var(--yellow)">${acep}</div>
+      <div class="stat-sub">${Math.round(acep/total*100)}% del grupo</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">🔴 Bajo</div>
+      <div class="stat-value" style="color:var(--red)">${bajo}</div>
+      <div class="stat-sub">${Math.round(bajo/total*100)}% del grupo</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Promedio</div>
+      <div class="stat-value">${fmtTime(avgSeg)}</div>
+      <div class="stat-sub">tiempo medio</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-label">⭐ Mejor tiempo</div>
+      <div class="stat-value" style="color:var(--gold);font-size:26px">${fmtTime(best.segundos)}</div>
+      <div class="stat-sub">${best.nombre}</div>
+    </div>`;
+
+  // INDEX BARS
+  const fw = data.filter(d=>d.grupo==='Forward');
+  const bk = data.filter(d=>d.grupo==='Back');
+  function indexHTML(arr, label) {
+    if(!arr.length) return '';
+    const b = arr.filter(d=>d.diagnostico==='Bien').length;
+    const a = arr.filter(d=>d.diagnostico==='Aceptable').length;
+    const bj = arr.filter(d=>d.diagnostico==='Bajo').length;
+    const n = arr.length;
+    return `<div class="index-card">
+      <div class="index-title">Índice ${label} <span style="color:var(--text);font-size:14px">(${n})</span></div>
+      <div class="index-bar-row">
+        <div class="index-bar-label" style="color:var(--green)">🟢 Bien</div>
+        <div class="index-bar-wrap"><div class="index-bar-fill" style="width:${b/n*100}%;background:var(--green)"></div></div>
+        <div class="index-bar-pct">${b} <span style="font-weight:400">(${Math.round(b/n*100)}%)</span></div>
+      </div>
+      <div class="index-bar-row">
+        <div class="index-bar-label" style="color:var(--yellow)">🟡 Acep.</div>
+        <div class="index-bar-wrap"><div class="index-bar-fill" style="width:${a/n*100}%;background:var(--yellow)"></div></div>
+        <div class="index-bar-pct">${a} <span style="font-weight:400">(${Math.round(a/n*100)}%)</span></div>
+      </div>
+      <div class="index-bar-row">
+        <div class="index-bar-label" style="color:var(--red)">🔴 Bajo</div>
+        <div class="index-bar-wrap"><div class="index-bar-fill" style="width:${bj/n*100}%;background:var(--red)"></div></div>
+        <div class="index-bar-pct">${bj} <span style="font-weight:400">(${Math.round(bj/n*100)}%)</span></div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('index-section').innerHTML =
+    indexHTML(data,'General') + indexHTML(fw,'Forwards') + indexHTML(bk,'Backs');
+
+  // RANKINGS
+  function rankingHTML(arr, label) {
+    const sorted = [...arr].sort((a,b)=>a.segundos-b.segundos).slice(0,10);
+    const best0 = sorted[0];
+    const avgS = arr.length ? Math.round(arr.reduce((s,d)=>s+d.segundos,0)/arr.length) : 0;
+    const posLabels = ['🥇','🥈','🥉','4°','5°','6°','7°','8°','9°','10°'];
+    const posClass = ['top1','top2','top3','','','','','','',''];
+    return `<div class="ranking-header">
+        <div class="ranking-title" style="color:${label==='Forwards'?'var(--accent)':'var(--gold)'}">${label}</div>
+        <div class="ranking-avg">Prom: ${fmtTime(avgS)}</div>
+      </div>
+      ${sorted.map((d,i)=>`
+      <div class="ranking-row" onclick="openModal('${d.nombre}')">
+        <div class="rank-pos ${posClass[i]}">${posLabels[i]}</div>
+        <div class="rank-name">${d.nombre}</div>
+        <div class="rank-puesto">${d.puesto||'—'}</div>
+        <div class="rank-time" style="color:${diagColor(d.diagnostico)}">${fmtTime(d.segundos)}</div>
+        <div class="rank-diff" style="color:var(--muted)">${i===0?'':'+'+fmtTime(d.segundos-best0.segundos)}</div>
+      </div>`).join('')}`;
+  }
+  document.getElementById('ranking-forwards').innerHTML = rankingHTML(fw,'Forwards');
+  document.getElementById('ranking-backs').innerHTML = rankingHTML(bk,'Backs');
+}
+
+// ===================== TABLA =====================
+let tblSort = {col:'segundos', dir:1};
+function sortTabla(col) {
+  if(tblSort.col===col) tblSort.dir*=-1;
+  else { tblSort.col=col; tblSort.dir=1; }
+  renderTabla();
+}
+function renderTabla() {
+  const cat = document.getElementById('tbl-cat').value;
+  const grupo = document.getElementById('tbl-grupo').value;
+  const diag = document.getElementById('tbl-diag').value;
+  const q = document.getElementById('tbl-search').value.toLowerCase();
+  let data = DATOS.filter(d =>
+    (!cat || d.categoria===cat) &&
+    (!grupo || d.grupo===grupo) &&
+    (!diag || d.diagnostico===diag) &&
+    (!q || d.nombre.toLowerCase().includes(q))
+  );
+  data.sort((a,b)=>{
+    let va=a[tblSort.col]||'', vb=b[tblSort.col]||'';
+    if(typeof va==='string') va=va.toLowerCase(), vb=vb.toLowerCase();
+    return va<vb?-tblSort.dir:va>vb?tblSort.dir:0;
+  });
+  const best = data.length ? data.reduce((m,d)=>d.segundos<m.segundos?d:m,data[0]) : null;
+  document.getElementById('tabla-body').innerHTML = data.map((d,i)=>`
+    <tr onclick="openModal('${d.nombre}')" style="cursor:pointer">
+      <td style="color:var(--muted);font-family:'Barlow Condensed';font-weight:700">${i+1}</td>
+      <td style="font-weight:500">${d.nombre}</td>
+      <td>${d.puesto||'—'}</td>
+      <td><span class="tag-cat">${d.categoria}</span></td>
+      <td style="color:var(--muted)">${d.grupo||'—'}</td>
+      <td class="td-time" style="color:${best&&d.nombre===best.nombre?'var(--gold)':'var(--text)'}">${fmtTime(d.segundos)}</td>
+      <td class="td-vam" style="color:var(--accent)">${d.vam}</td>
+      <td><span class="badge ${diagClass(d.diagnostico)}">${diagEmoji(d.diagnostico)} ${d.diagnostico}</span></td>
+      <td style="color:var(--muted)">${d.fecha}</td>
+    </tr>`).join('') || '<tr><td colspan="9" class="empty">Sin resultados</td></tr>';
+}
+
+// ===================== JUGADORES =====================
+function renderJugadores() {
+  const q = document.getElementById('jug-search').value.toLowerCase();
+  const cat = document.getElementById('jug-cat').value;
+  // Group by player name
+  const byPlayer = {};
+  DATOS.forEach(d => {
+    if((!q || d.nombre.toLowerCase().includes(q)) && (!cat || d.categoria===cat)) {
+      if(!byPlayer[d.nombre]) byPlayer[d.nombre] = [];
+      byPlayer[d.nombre].push(d);
+    }
+  });
+  const players = Object.keys(byPlayer).sort();
+  document.getElementById('player-grid').innerHTML = players.map(name => {
+    const tests = byPlayer[name].sort((a,b)=>a.segundos-b.segundos);
+    const best = tests[0];
+    const last = tests[tests.length-1];
+    return `<div class="player-card" onclick="openModal('${name}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div class="player-name">${name}</div>
+        <span class="tag-cat">${best.categoria}</span>
+      </div>
+      <div class="player-meta">${best.puesto||'—'} · ${best.grupo||'—'}</div>
+      <div class="player-stats">
+        <div class="player-stat">
+          <div class="player-stat-label">Mejor</div>
+          <div class="player-stat-val" style="color:${diagColor(best.diagnostico)}">${fmtTime(best.segundos)}</div>
+        </div>
+        <div class="player-stat">
+          <div class="player-stat-label">VAM</div>
+          <div class="player-stat-val" style="color:var(--accent)">${best.vam}</div>
+        </div>
+        <div class="player-stat">
+          <div class="player-stat-label">Tests</div>
+          <div class="player-stat-val" style="color:var(--muted)">${tests.length}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty"><div class="empty-icon">🔍</div>No se encontraron jugadores</div>';
+}
+
+// ===================== MODAL =====================
+function openModal(nombre) {
+  const tests = DATOS.filter(d=>d.nombre===nombre).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  if(!tests.length) return;
+  const best = [...tests].sort((a,b)=>a.segundos-b.segundos)[0];
+  const last = tests[tests.length-1];
+  document.getElementById('modal-name').textContent = nombre;
+  document.getElementById('modal-meta').textContent = `${best.puesto||'—'} · ${best.grupo||'—'} · ${best.categoria}`;
+  document.getElementById('modal-kpis').innerHTML = `
+    <div class="modal-kpi">
+      <div class="modal-kpi-label">⭐ Mejor marca</div>
+      <div class="modal-kpi-val" style="color:var(--gold)">${fmtTime(best.segundos)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${best.fecha}</div>
+    </div>
+    <div class="modal-kpi">
+      <div class="modal-kpi-label">● Último test</div>
+      <div class="modal-kpi-val" style="color:${diagColor(last.diagnostico)}">${fmtTime(last.segundos)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${last.fecha}</div>
+    </div>
+    <div class="modal-kpi">
+      <div class="modal-kpi-label">VAM km/h</div>
+      <div class="modal-kpi-val" style="color:var(--accent)">${best.vam}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">en mejor marca</div>
+    </div>`;
+  document.getElementById('modal-hist').innerHTML = tests.map(t=>`
+    <div class="hist-row">
+      <div class="hist-date">${t.fecha}</div>
+      <div class="hist-inst">${t.instancia}</div>
+      <div class="hist-time" style="color:${diagColor(t.diagnostico)}">${fmtTime(t.segundos)}</div>
+      <div style="margin-left:8px"><span class="badge ${diagClass(t.diagnostico)}">${diagEmoji(t.diagnostico)}</span></div>
+      <div class="hist-vam">${t.vam} km/h</div>
+    </div>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function renderRanking() {
+  const inst = document.getElementById('rank-inst').value;
+  const CATS = ['PS','M19','M17','M16','M15'];
+  const container = document.getElementById('ranking-por-categoria');
+
+  // Build one section per category that has data
+  let html = '';
+  CATS.forEach(cat => {
+    const catData = DATOS.filter(d => d.categoria === cat && (!inst || d.instancia === inst));
+    if (!catData.length) return;
+
+    const fw = [...catData.filter(d => d.grupo === 'Forward')].sort((a,b) => a.segundos - b.segundos);
+    const bk = [...catData.filter(d => d.grupo === 'Back')].sort((a,b) => a.segundos - b.segundos);
+
+    const posLabels = ['🥇','🥈','🥉'];
+    const posClasses = ['p1','p2','p3'];
+
+    function colHTML(arr) {
+      if (!arr.length) return '<div style="color:var(--muted);font-size:13px;padding:12px 0">Sin datos</div>';
+      const best = arr[0];
+      return arr.map((d, i) => {
+        const posLabel = i < 3 ? posLabels[i] : (i + 1);
+        const posClass = i < 3 ? posClasses[i] : 'pn';
+        const cardClass = i === 0 ? 'pos-1' : i === 1 ? 'pos-2' : i === 2 ? 'pos-3' : '';
+        const diff = i === 0 ? '' : `<div class="rank-card-diff">+${fmtTime(d.segundos - best.segundos)}</div>`;
+        return `<div class="rank-card ${cardClass}" onclick="openModal('${d.nombre.replace(/'/g,"\'")}')">
+          <div class="rank-card-pos ${posClass}">${posLabel}</div>
+          <div class="rank-card-info">
+            <div class="rank-card-name">${d.nombre}</div>
+            <div class="rank-card-meta"><span>${d.puesto || '—'}</span></div>
+          </div>
+          <div class="rank-card-right">
+            <div class="rank-card-time" style="color:${diagColor(d.diagnostico)}">${fmtTime(d.segundos)}</div>
+          </div>
+          ${diff}
+        </div>`;
+      }).join('');
+    }
+
+    html += `
+      <div class="cat-ranking-block">
+        <div class="cat-ranking-title">${cat}</div>
+        <div class="rank-columns">
+          <div>
+            <div class="rank-col-title" style="color:var(--accent)">🏉 FORWARDS</div>
+            ${colHTML(fw)}
+          </div>
+          <div>
+            <div class="rank-col-title" style="color:var(--gold)">⚡ BACKS</div>
+            ${colHTML(bk)}
+          </div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html || '<div class="empty"><div class="empty-icon">🔍</div>Sin datos para esta instancia</div>';
+}
+
+
+function closeModal(e) {
+  if(e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ===================== INIT =====================
+async function init() {
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLUk5Ngb8816iubmqnVS4HkQrwb8q-NQJp8fQXOAGZAINwNLql049dCxpsT4EJ3L03DxSihfNm_gFl/pub?gid=1609079024&single=true&output=csv";
+  // Intentamos con dos proxies alternativos por si uno falla
+  const PROXY = "https://corsproxy.io/?" + encodeURIComponent(CSV_URL);
+  const loading = document.getElementById('loading-screen');
+  try {
+    const res = await fetch(PROXY);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const rows = text.trim().split('\n').slice(1);
+
+    function parseRow(row) {
+      const cols = [];
+      let cur = '', inQ = false;
+      for (let ch of row) {
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      cols.push(cur.trim());
+      return cols;
+    }
+
+    DATOS.length = 0;
+    rows.forEach(row => {
+      const c = parseRow(row);
+      const nombre = c[1] || '';
+      const fecha = (c[2] || '').substring(0, 10);
+      const puesto = c[3] || '';
+      const instancia = c[6] || '';
+      const categoria = c[7] || '';
+      const segundos = parseInt(c[9]) || 0;
+      const diagRaw = c[11] || '';
+      let diagnostico = 'Bajo';
+      if (diagRaw.includes('Bien')) diagnostico = 'Bien';
+      else if (diagRaw.includes('Aceptable')) diagnostico = 'Aceptable';
+      if (nombre && segundos > 0) {
+        DATOS.push({ nombre, fecha, puesto, instancia, categoria, segundos, diagnostico });
+      }
+    });
+
+    DATOS.forEach(d => {
+      d.grupo = GRUPO_MAP[d.puesto] || (d.puesto ? 'Forward' : '');
+      d.vam = +(4320 / d.segundos).toFixed(2);
+    });
+
+    loading.style.display = 'none';
+    initSelects();
+    renderDashboard();
+    renderTabla();
+    renderJugadores();
+    renderRanking();
+
+  } catch(e) {
+    console.error("Error cargando datos:", e);
+    loading.innerHTML = `
+      <div style="text-align:center;padding:80px 20px;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:16px">&#9888;&#65039;</div>
+        <div style="font-family:'Barlow Condensed';font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text)">No se pudieron cargar los datos</div>
+        <div style="font-size:13px;max-width:380px;margin:0 auto;margin-bottom:12px">Error: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px">${e.message}</code></div>
+        <div style="font-size:12px;max-width:380px;margin:0 auto;color:var(--muted)">Verificá tu conexión a internet y que el Sheet esté publicado como CSV.</div>
+        <button onclick="location.reload()" style="margin-top:20px;background:var(--accent);border:none;color:#fff;font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1px;padding:10px 24px;border-radius:8px;cursor:pointer">REINTENTAR</button>
+      </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
