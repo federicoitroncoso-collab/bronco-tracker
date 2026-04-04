@@ -1581,16 +1581,8 @@ function renderRanking() {
         </div>`;
       }).join('');
 
-      // Full list below podium
-      const listHTML = arr.map((d, i) => `
-        <div class="podium-list-row" onclick="openModal('${d.nombre.replace(/'/g,"\'")}')">
-          <div class="podium-list-pos" style="color:${i<3?podColors[i=== 0?1:i===1?0:2]:'var(--muted)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'°'}</div>
-          <div class="podium-list-name">${d.nombre}</div>
-          <div class="podium-list-puesto">${d.puesto||'—'}</div>
-          <div class="podium-list-time" style="color:${diagColor(d.diagnostico)}">${fmtTime(d.segundos)}</div>
-        </div>`).join('');
-
-      return `<div class="podium-group">
+      const listHTML = '';
+            return `<div class="podium-group">
         <div class="podium-group-title" style="color:${color}">${label}</div>
         <div class="podium-stage">${cardsHTML}</div>
         <div class="podium-list">${listHTML}</div>
@@ -1600,8 +1592,8 @@ function renderRanking() {
     html += `<div class="cat-block">
       <div class="cat-block-title">${c}</div>
       <div class="podium-two-col">
-        ${podiumHTML(fw, '🏉 FORWARDS', 'var(--accent)')}
-        ${podiumHTML(bk, '⚡ BACKS', 'var(--gold)')}
+        ${podiumHTML(fw, 'FORWARDS', 'var(--accent)')}
+        ${podiumHTML(bk, 'BACKS', 'var(--gold)')}
       </div>
     </div>`;
   });
