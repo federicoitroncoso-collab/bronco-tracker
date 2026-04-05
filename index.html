@@ -1555,147 +1555,48 @@ function renderRanking() {
     const fw = [...catData.filter(d => d.grupo === 'Forward')].sort((a,b) => a.segundos - b.segundos);
     const bk = [...catData.filter(d => d.grupo === 'Back')].sort((a,b) => a.segundos - b.segundos);
 
-    function podiumHTML(arr, label, accentColor, lightBg, borderColor) {
+    function podiumHTML(arr, label, color) {
       if (!arr.length) return '';
       const top = arr.slice(0, 3);
-      // Order: 2nd left, 1st center, 3rd right
       const slots = [
-        { d: top[1], pos: 2, color: '#8a9bb0', bg: '#e8ecf0', height: '110px', fontSize: '80px' },
-        { d: top[0], pos: 1, color: '#d4a017', bg: '#fff8e6', height: '150px', fontSize: '110px' },
-        { d: top[2], pos: 3, color: '#a0714a', bg: '#f5ede4', height: '80px',  fontSize: '64px' },
+        { d: top[1], pos: '2', posClass: 'p2', cardClass: 'pos-2', height: '110px', podColor: '#9ca3af', podBg: 'rgba(156,163,175,0.08)', podBorder: 'rgba(156,163,175,0.3)' },
+        { d: top[0], pos: '1', posClass: 'p1', cardClass: 'pos-1', height: '150px', podColor: '#d4a017', podBg: 'rgba(212,160,23,0.12)', podBorder: 'rgba(212,160,23,0.5)' },
+        { d: top[2], pos: '3', posClass: 'p3', cardClass: 'pos-3', height: '80px',  podColor: '#a0714a', podBg: 'rgba(160,113,74,0.08)',  podBorder: 'rgba(160,113,74,0.3)' },
       ].filter(s => s.d);
 
-      const slotsHTML = slots.map(({d, pos, color, bg, height, fontSize}) => {
-        const isFirst = pos === 1;
-        return `<div style="
-            display:flex;flex-direction:column;align-items:center;
-            flex:${isFirst ? '1.4' : '1'};
-          ">
-          <!-- Card -->
-          <div style="
-            background:${bg};
-            border:2px solid ${color}40;
-            border-top:4px solid ${color};
-            border-radius:12px;
-            padding:${isFirst?'20px 16px':'14px 12px'};
-            width:100%;
-            text-align:center;
-            margin-bottom:10px;
-            box-shadow: 0 ${isFirst?'8':'4'}px ${isFirst?'24':'12'}px ${color}20;
-          ">
-            <div style="
+      const cardsHTML = slots.map(({d, pos, posClass, cardClass, height, podColor, podBg, podBorder}) => {
+        const isFirst = pos === '1';
+        return `<div class="podium-slot ${isFirst ? 'podium-slot-first' : ''}">
+          <div class="podium-card" style="border-color:${podBorder};background:${podBg}">
+            <div class="podium-card-pos" style="
               font-family:'Bebas Neue',sans-serif;
-              font-size:${fontSize};
+              font-size:${isFirst?'48px':'36px'};
+              color:${podColor};
               line-height:1;
-              color:${color};
-              opacity:0.15;
-              margin-bottom:-${isFirst?'20':'12'}px;
+              margin-bottom:4px;
             ">${pos}</div>
-            <div style="
-              font-family:'Bebas Neue',sans-serif;
-              font-size:11px;
-              letter-spacing:2px;
-              color:${color};
-              margin-bottom:6px;
-              position:relative;
-            ">${pos}°</div>
-            <div style="
-              font-family:'Barlow Condensed',sans-serif;
-              font-size:${isFirst?'20':'16'}px;
-              font-weight:900;
-              color:#1a2e18;
-              line-height:1.15;
-              margin-bottom:6px;
-              position:relative;
-            ">${d.nombre}</div>
-            <div style="
-              font-size:11px;
-              font-weight:700;
-              color:#ffffff;
-              background:${color};
-              display:inline-block;
-              padding:2px 10px;
-              border-radius:20px;
-              margin-bottom:${isFirst?'14':'10'}px;
-              position:relative;
-            ">${d.puesto||'—'}</div>
-            <div style="
-              font-family:'Bebas Neue',sans-serif;
-              font-size:${isFirst?'42':'32'}px;
-              letter-spacing:2px;
-              color:${diagColor(d.diagnostico)};
-              line-height:1;
-              position:relative;
-            ">${fmtTime(d.segundos)}</div>
+            <div class="podium-card-name">${d.nombre}</div>
+            <div class="podium-card-puesto">${d.puesto||'—'}</div>
+            <div class="podium-card-time" style="color:${podColor}">${fmtTime(d.segundos)}</div>
           </div>
-          <!-- Podium base -->
-          <div style="
-            width:100%;
-            height:${height};
-            background:${color};
-            border-radius:6px 6px 0 0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-          ">
-            <div style="
-              font-family:'Bebas Neue',sans-serif;
-              font-size:${isFirst?'52':'36'}px;
-              color:rgba(255,255,255,0.9);
-              letter-spacing:2px;
-              text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            ">${pos}</div>
+          <div class="podium-base" style="height:${height};background:${podColor}">
+            <div class="podium-base-label">${pos}</div>
           </div>
         </div>`;
       }).join('');
 
-      return `<div style="margin-bottom:48px;">
-        <!-- Group header -->
-        <div style="
-          display:flex;
-          align-items:center;
-          gap:12px;
-          margin-bottom:28px;
-          padding:12px 20px;
-          background:${lightBg};
-          border-left:5px solid ${accentColor};
-          border-radius:0 8px 8px 0;
-        ">
-          <div style="
-            font-family:'Bebas Neue',sans-serif;
-            font-size:24px;
-            letter-spacing:3px;
-            color:${accentColor};
-          ">${label}</div>
-          <div style="
-            font-family:'Barlow Condensed',sans-serif;
-            font-size:12px;
-            font-weight:700;
-            letter-spacing:1px;
-            color:#8a9bb0;
-            margin-left:auto;
-          ">${arr.length} jugadores</div>
-        </div>
-        <!-- Podium -->
-        <div style="display:flex;align-items:flex-end;gap:12px;padding:0 8px;">
-          ${slotsHTML}
-        </div>
+      return `<div class="podium-group">
+        <div class="podium-group-title" style="color:${color}">${label}</div>
+        <div class="podium-stage">${cardsHTML}</div>
       </div>`;
     }
 
-    html += `<div style="margin-bottom:60px;">
-      <div style="
-        font-family:'Bebas Neue',sans-serif;
-        font-size:52px;
-        letter-spacing:5px;
-        color:#1a2e18;
-        border-bottom:3px solid #2d7a32;
-        padding-bottom:8px;
-        margin-bottom:32px;
-        display:inline-block;
-      ">${c}</div>
-      ${podiumHTML(fw, 'FORWARDS', '#2d7a32', '#edf7ed', '#2d7a32')}
-      ${podiumHTML(bk, 'BACKS',    '#c0392b', '#fdf0ee', '#c0392b')}
+    html += `<div class="cat-block">
+      <div class="cat-block-title">${c}</div>
+      <div class="podium-two-col">
+        ${podiumHTML(fw, 'FORWARDS', 'var(--accent)')}
+        ${podiumHTML(bk, 'BACKS', 'var(--red)')}
+      </div>
     </div>`;
   });
 
