@@ -1613,7 +1613,7 @@ function closeModal(e) {
 async function init() {
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLUk5Ngb8816iubmqnVS4HkQrwb8q-NQJp8fQXOAGZAINwNLql049dCxpsT4EJ3L03DxSihfNm_gFl/pub?gid=1609079024&single=true&output=csv";
   // Intentamos con dos proxies alternativos por si uno falla
-  const PROXY = "https://corsproxy.io/?" + encodeURIComponent(CSV_URL);
+  const PROXY = "https://proxy.cors.sh/" + CSV_URL;
   const loading = document.getElementById('loading-screen');
   try {
     const res = await fetch(PROXY);
