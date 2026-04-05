@@ -1611,9 +1611,9 @@ function closeModal(e) {
 
 // ===================== INIT =====================
 async function init() {
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTLUk5Ngb8816iubmqnVS4HkQrwb8q-NQJp8fQXOAGZAINwNLql049dCxpsT4EJ3L03DxSihfNm_gFl/pub?gid=1609079024&single=true&output=csv";
+  
   // Intentamos con dos proxies alternativos por si uno falla
-  const PROXY = "https://proxy.cors.sh/" + CSV_URL;
+  const PROXY = "https://script.google.com/macros/s/AKfycbzEd7B-jT7115SnOBw3GSXsbZbIgwJ-O3kqQ3kGJb4LtF2bODMP6_mfRm3YiOp5Vg7Q/exec";
   const loading = document.getElementById('loading-screen');
   try {
     const res = await fetch(PROXY);
